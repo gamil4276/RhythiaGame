@@ -6,7 +6,7 @@ description   = "rhythia"
 license       = "MIT"
 srcDir        = "src"
 installExt    = @["nim"]
-bin           = @["RhythiaGame"]
+bin           = @["rhythia"]
 
 
 # Dependencies
