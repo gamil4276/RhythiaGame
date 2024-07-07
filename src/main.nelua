@@ -1,5 +1,5 @@
-require 'src.content.beatmap.parsers.ssp'
-require 'src.engine.logger'
+require "src.content.beatmap.parsers.ssp"
+require "src.engine.logger"
 
 logger:init("rhythia.log")
 

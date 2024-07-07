@@ -1,5 +1,5 @@
-require 'io'
-require 'os'
+require "io"
+require "os"
 
 global Logger = @record {
 	output_file: filestream,

@@ -1,9 +1,9 @@
-require 'io'
-require 'stringbuilder'
+require "io"
+require "stringbuilder"
 
-require 'src.engine.logger'
-require 'src.util.filestream'
-require 'src.content.beatmap.beatmapset'
+require "src.engine.logger"
+require "src.util.filestream"
+require "src.content.beatmap.beatmapset"
 
 local DataOffsets = @record{
     custom_data: uint64,

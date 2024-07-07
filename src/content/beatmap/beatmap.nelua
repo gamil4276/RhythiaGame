@@ -1,4 +1,4 @@
-require 'vector'
+require "vector"
 
 global NoteData = @record{
     x: float32,

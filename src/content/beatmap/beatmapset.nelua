@@ -1,5 +1,5 @@
-require 'vector'
-require 'src.content.beatmap.beatmap'
+require "vector"
+require "src.content.beatmap.beatmap"
 
 global BeatmapSet = @record{
     version: uint16,
