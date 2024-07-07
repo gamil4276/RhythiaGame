@@ -1,6 +1,7 @@
 require 'io'
 require 'stringbuilder'
 
+require 'src.engine.logger'
 require 'src.util.filestream'
 require 'src.content.beatmap.beatmapset'
 
@@ -102,7 +103,7 @@ local function get_notes(map: filestream): vector(NoteData)
         end
     end
 
-    print("Loaded "..note_count.." notes")
+    logger:info("Loaded ", note_count, " notes")
 
     return notes
 end
@@ -129,17 +130,19 @@ global function parse_sspm(path: string): BeatmapSet
         broken = false
     }
 
+    logger:info("Loading map '", path, "'")
+
     local file, msg, code = io.open(path, "r")
     defer file:close() end
 
     if code ~= 0 then
-        print("Failed to open map file '"..path.."'")
+        logger:warn("Failed to open map file '", path, "'")
         set.broken = true
         return set
     end
 
     if verify_signature(file) ~= true then
-        print("Incorrect file signature, got: "..read_magic(file))
+        logger:warn("Incorrect file signature, got: '", read_magic(file), "'")
         set.broken = true
         return set
     end

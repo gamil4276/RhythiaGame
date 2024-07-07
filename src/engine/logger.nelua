@@ -1,0 +1,58 @@
+require 'io'
+require 'os'
+
+global Logger = @record {
+	output_file: filestream,
+	initialized: boolean,
+}
+
+global logger: Logger
+
+function Logger:init(path: string)
+	local file, msg, code = filestream.open(path, "w+")
+	if code ~= 0 then
+		print("Failed to open log file: "..msg.."\nLogs will not be appended to "..path)
+		self.initialized = false
+		return
+	end
+
+	self.initialized = true
+	self.output_file = file
+end
+
+function Logger:write(tag: string, ...: varargs)
+	local tag_full = "["..tag.." "..(os.date("%c", os.realtime()).."] ")
+	
+	io.stdout:write(tag_full)
+	if self.initialized then
+		self.output_file:write(tag_full)
+	end
+
+	## for i = 1, select("#", ...) do
+		io.stdout:write(#[select(i, ...)]#)
+		if self.initialized then
+			self.output_file:write(#[select(i, ...)]#)
+		end
+	## end
+
+	io.stdout:write("\n")
+
+	io.stdout:flush()
+	if self.initialized then
+		self.output_file:write("\n")
+		self.output_file:flush()
+	end
+end
+
+function Logger:info(...: varargs)
+	self:write("INFO", ...)
+end
+
+function Logger:warn(...: varargs)
+	self:write("WARN", ...)
+end
+
+function Logger:error(...: varargs)
+	self:write("ERROR", ...)
+	os.exit(-1)
+end
