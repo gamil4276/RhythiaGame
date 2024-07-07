@@ -127,7 +127,7 @@ local function get_data_offsets(map: filestream): DataOffsets
     return offsets
 end
 
-global function parse_sspm(path: string): BeatmapSet
+function BeatmapSet.from_sspm(path: string): BeatmapSet
     local set = BeatmapSet {
         broken = false
     }
