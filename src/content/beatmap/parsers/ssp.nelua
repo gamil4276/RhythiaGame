@@ -5,6 +5,8 @@ require "src.engine.logger"
 require "src.util.filestream"
 require "src.content.beatmap.beatmapset"
 
+-- test
+
 local DataOffsets = @record{
     custom_data: uint64,
     markers: uint64,
