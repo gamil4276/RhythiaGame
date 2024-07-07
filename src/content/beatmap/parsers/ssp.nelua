@@ -70,6 +70,11 @@ local function get_notes(map: filestream): vector(NoteData)
     map:seek("set", BlockOffsets.MarkerOffset)
     notes:reserve(note_count)
 
+    local convUnion = @union {
+        n: uint32,
+        o: float32,
+    }
+
     for i = 0, <note_count do
         local time = (@float32)(map:get_32()) / 1000.0
 
@@ -77,11 +82,17 @@ local function get_notes(map: filestream): vector(NoteData)
 
         local has_quantum = map:get_8() == 1
         if has_quantum then
-            notes:push(NoteData{ -- still not sure how to convert uint32 to float, will do later
-                x = -((@float32)(map:get_32()) - 1.0),
-                y = -((@float32)(map:get_32()) - 1.0),
+            local x_conv: convUnion
+            local y_conv: convUnion
+            x_conv.n = map:get_32()
+            y_conv.n = map:get_32()
+
+            local note = NoteData { -- still not sure how to convert uint32 to float, will do later
+                x = -(x_conv.o - 1.0),
+                y = -(y_conv.o - 1.0),
                 t = time,
-            })
+            }
+            notes:push(note)            
         else
             notes:push(NoteData{
                 x = -((@float32)(map:get_8()) - 1.0),
@@ -145,7 +156,5 @@ global function parse_sspm(path: string): BeatmapSet
         notes = get_notes(file),
     })
 
-    print(set.title)
-    print(set.mappers[0])
     return set
 end

@@ -6,17 +6,17 @@ end
 
 function filestream:get_16(): uint16
     local bytes = self:read(2)
-    return (bytes[2] << 8) | bytes[1]
+    return ((@uint32)(bytes[2]) << 8) | (@uint32)(bytes[1])
 end
 
 function filestream:get_32(): uint32
     local bytes = self:read(4)
-    return (bytes[4] << 24) | (bytes[3] << 16) | (bytes[2] << 8) | bytes[1]
+    return ((@uint32)(bytes[4]) << 24) | ((@uint32)(bytes[3]) << 16) | ((@uint32)(bytes[2]) << 8) | (@uint32)(bytes[1])
 end
 
 function filestream:get_64(): uint64
     local bytes = self:read(8)
-    return (bytes[8] << 56) | (bytes[7] << 48) | (bytes[6] << 40) | (bytes[5] << 32) | (bytes[4] << 24) | (bytes[3] << 16) | (bytes[2] << 8) | bytes[1]
+    return ((@uint32)(bytes[8]) << 56) | ((@uint32)(bytes[7]) << 48) | ((@uint32)(bytes[6]) << 40) | ((@uint32)(bytes[5]) << 32) | ((@uint32)(bytes[4]) << 24) | ((@uint32)(bytes[3]) << 16) | ((@uint32)(bytes[2]) << 8) | (@uint32)(bytes[1])
 end
 
 function filestream:get_string(): string

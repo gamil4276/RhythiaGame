@@ -6,6 +6,10 @@ global NoteData = @record{
     t: float32,
 }
 
+function NoteData:__tostring(): string
+    return self.x..", "..self.y..", "..self.t
+end
+
 global Beatmap = @record{
     version: uint8,
     name: string,

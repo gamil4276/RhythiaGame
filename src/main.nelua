@@ -1,3 +1,3 @@
 require 'src.content.beatmap.parsers.ssp'
 
-parse_sspm("demomap/singularity.sspm")
+parse_sspm("demomap/fly.sspm")
