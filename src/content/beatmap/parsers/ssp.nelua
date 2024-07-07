@@ -1,0 +1,151 @@
+require 'io'
+require 'stringbuilder'
+
+require 'src.util.filestream'
+require 'src.content.beatmap.beatmapset'
+
+local DataOffsets = @record{
+    custom_data: uint64,
+    markers: uint64,
+    audio: uint64,
+    audio_length: uint64
+}
+
+local BlockOffsets = @enum{
+    Magic = 0x0,
+    Version = 0x4,
+    NoteCount = 0x22,
+    Difficulty = 0x2a,
+    DataOffsets = 0x30,
+    MarkerOffset = 0x70,
+    IdOffset = 0x80,
+}
+
+local function read_magic(map: filestream): string
+    map:seek("set", BlockOffsets.Magic)
+    return map:read(4)
+end
+
+local function verify_signature(map: filestream): boolean
+    return read_magic(map) == "SS+m"
+end
+
+local function get_version(map: filestream): uint16
+    map:seek("set", BlockOffsets.Version)
+    return map:get_16()
+end
+
+local function get_title(map: filestream): string
+    map:seek("set", BlockOffsets.IdOffset)
+    local title_offs = BlockOffsets.IdOffset + map:get_16() + 0x2
+    map:seek("set", title_offs)
+    return map:get_string()
+end
+
+local function get_mappers(map: filestream): vector(string)
+    local mappers: vector(string)
+
+    map:seek("set", BlockOffsets.IdOffset)
+    local title_offs = BlockOffsets.IdOffset + map:get_16() + 0x2
+    map:seek("set", title_offs)
+    local mapper_offs = title_offs + map:get_16() + 0x2
+    map:seek("set", mapper_offs)
+
+    map:get_string()
+
+    local mappers_len = map:get_16()
+    for i = 0, <mappers_len do
+        mappers:push(map:get_string())
+    end
+
+    return mappers
+end
+
+local function get_notes(map: filestream): vector(NoteData)
+    local notes: vector(NoteData)
+
+    map:seek("set", BlockOffsets.NoteCount)
+    local note_count = map:get_32()
+
+    map:seek("set", BlockOffsets.MarkerOffset)
+    notes:reserve(note_count)
+
+    for i = 0, <note_count do
+        local time = (@float32)(map:get_32()) / 1000.0
+
+        map:get_8() -- why the useless number????
+
+        local has_quantum = map:get_8() == 1
+        if has_quantum then
+            notes:push(NoteData{ -- still not sure how to convert uint32 to float, will do later
+                x = -((@float32)(map:get_32()) - 1.0),
+                y = -((@float32)(map:get_32()) - 1.0),
+                t = time,
+            })
+        else
+            notes:push(NoteData{
+                x = -((@float32)(map:get_8()) - 1.0),
+                y = -((@float32)(map:get_8()) - 1.0),
+                t = time,
+            })
+        end
+    end
+
+    print("Loaded "..note_count.." notes")
+
+    return notes
+end
+
+local function get_data_offsets(map: filestream): DataOffsets
+    local offsets = DataOffsets{}
+    
+    map:seek("set", BlockOffsets.DataOffsets)
+    
+    offsets.custom_data = map:get_64()
+    map:seek("cur", 0x8)
+
+    offsets.audio = map:get_64()
+    offsets.audio_length = map:get_64()
+
+    map:seek("set", BlockOffsets.MarkerOffset)
+    offsets.markers = map:get_64()
+
+    return offsets
+end
+
+global function parse_sspm(path: string): BeatmapSet
+    local set = BeatmapSet {
+        broken = false
+    }
+
+    local file, msg, code = io.open(path, "r")
+    defer file:close() end
+
+    if code ~= 0 then
+        print("Failed to open map file '"..path.."'")
+        set.broken = true
+        return set
+    end
+
+    if verify_signature(file) ~= true then
+        print("Incorrect file signature, got: "..read_magic(file))
+        set.broken = true
+        return set
+    end
+
+    local offsets = get_data_offsets(file)
+
+    set.version = get_version(file)
+    set.title = get_title(file)
+    set.mappers = get_mappers(file)
+
+    set.difficulties:push(Beatmap{
+        version = 1,
+        name = "SSPMap",
+        notes = get_notes(file),
+    })
+
+    print(set.title)
+    print(set.mappers[0])
+    return set
+end

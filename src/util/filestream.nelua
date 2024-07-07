@@ -1,0 +1,46 @@
+require 'io'
+
+function filestream:get_8(): uint8
+    return self:read(1)[1]
+end
+
+function filestream:get_16(): uint16
+    local bytes = self:read(2)
+    return (bytes[2] << 8) | bytes[1]
+end
+
+function filestream:get_32(): uint32
+    local bytes = self:read(4)
+    return (bytes[4] << 24) | (bytes[3] << 16) | (bytes[2] << 8) | bytes[1]
+end
+
+function filestream:get_64(): uint64
+    local bytes = self:read(8)
+    return (bytes[8] << 56) | (bytes[7] << 48) | (bytes[6] << 40) | (bytes[5] << 32) | (bytes[4] << 24) | (bytes[3] << 16) | (bytes[2] << 8) | bytes[1]
+end
+
+function filestream:get_string(): string
+    local len = self:get_16()
+    local value: stringbuilder
+    value:prepare(len)
+    defer value:destroy() end
+    
+    for i = 0, <len do
+        value:writebyte(self:get_8())
+    end
+
+    return value:__tostring()
+end
+
+function filestream:get_string_long(): string
+    local len = self:get_32()
+    local value: stringbuilder
+    value:prepare(len)
+    defer value:destroy() end
+
+    for i = 0, <len do
+        value:writebyte(self:get_8())
+    end
+
+    return value:__tostring()
+end

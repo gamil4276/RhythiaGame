@@ -1,0 +1,11 @@
+require 'vector'
+require 'src.content.beatmap.beatmap'
+
+global BeatmapSet = @record{
+    version: uint16,
+    broken: boolean,
+    title: string,
+    mappers: vector(string),
+    difficulties: vector(Beatmap),
+}
+

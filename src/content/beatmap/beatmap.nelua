@@ -1,0 +1,13 @@
+require 'vector'
+
+global NoteData = @record{
+    x: float32,
+    y: float32,
+    t: float32,
+}
+
+global Beatmap = @record{
+    version: uint8,
+    name: string,
+    notes: vector(NoteData),
+}
