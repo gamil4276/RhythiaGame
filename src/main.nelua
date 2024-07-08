@@ -2,6 +2,18 @@ require "src.content.beatmap.parsers.ssp"
 require "src.engine.logger"
 require "src.engine.window"
 require "src.game.loading"
+
+##[[
+if FAST then
+	print("release build")
+	cflags '-Ofast'
+	ldflags '-s'
+else
+	print("debug build")
+	cflags '-Og'
+end
+]]
+
 logger:init("rhythia.log")
 
 local window: Window

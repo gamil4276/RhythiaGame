@@ -1,11 +1,13 @@
 require "src.engine.scene.register"
 require "src.engine.scene.handler"
+require "src.content.beatmap.parsers.ssp"
+require "src.game.global"
 
 global LoadingScene = @record{
 }
 
 function LoadingScene:update_impl(handler: *SceneHandler, dt: float32): void
-	print("hi")
+	-- DemoMap = BeatmapSet.from_sspm("demomap/fly.sspm")	
 	handler:remove_scene("Loading")
 end
 

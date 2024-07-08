@@ -15,6 +15,7 @@ function Window:run(): void
 		rl.beginDrawing()
 		rl.clearBackground(rl.BLACK)
 		self.scene_handler:render_all()
+		rl.drawFPS(0, 0)
 		rl.endDrawing()
 	end
 end
