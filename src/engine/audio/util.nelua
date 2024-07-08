@@ -1,11 +1,13 @@
-global function get_file_format(data: vector(byte)): string
+global function get_audio_file_format(data: span(byte)): string
     if #data < 10 then return "unknown" end
 
     if data[0] == 0x52 and data[1] == 0x49 and data[2] == 0x46 and data[3] == 0x46 then
         return ".wav"
-    elseif (data[0] == 0xff and (data[1] == 0xfb or (data[1] == 0xfa and data[2] == 0x90))) or (bytes[0] == 0x49 and bytes[1] == 0x44) and bytes[2] == 0x33 then
+    elseif (data[0] == 0xff and (data[1] == 0xfb or (data[1] == 0xfa and data[2] == 0x90))) or (data[0] == 0x49 and data[1] == 0x44) and data[2] == 0x33 then
         return ".mp3"
     elseif data[0] == 0x4f and data[1] == 0x67 and data[2] == 0x67 and data[3] == 0x53 then
         return ".ogg"
     end
+
+    return "unknown"
 end

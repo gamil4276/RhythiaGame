@@ -1,6 +1,6 @@
 require "vector"
 require "src.content.beatmap.beatmap"
-
+require "allocators.default"
 global BeatmapSet = @record{
     version: uint16,
     broken: boolean,
@@ -8,6 +8,5 @@ global BeatmapSet = @record{
     mappers: vector(string),
     difficulties: vector(Beatmap),
 
-    audio: vector(byte),
+    audio: span(byte),
 }
-

@@ -1,8 +1,12 @@
+require "src.engine.audio.syncedplayer"
+require "src.game.global"
+
 global SingleplayerScene = @record{
+    audio: SyncedAudioPlayer
 }
 
 function SingleplayerScene:init_impl(): void
-    print("should be called once")
+    self.audio = SyncedAudioPlayer.from_bytes(DemoMap.audio, 0.1, 1.0)
 end
 
 function SingleplayerScene:update_impl(handler: *SceneHandler, dt: float32): void

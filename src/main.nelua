@@ -1,6 +1,9 @@
 ##[[
 cdefine "NOGDI"
 cdefine "NOUSER"
+cdefine "SUPPORT_FILEFORMAT_MP3"
+cdefine "SUPPORT_FILEFORMAT_OGG"
+cdefine "SUPPORT_FILEFORMAT_WAV"
 ]]
 
 require "raylib"

@@ -1,8 +1,11 @@
-require "io"
+require "src.util.bytestream"
 require "stringbuilder"
+require "sequence"
+require "memory"
+require "allocators.default"
 
 require "src.engine.logger"
-require "src.util.filestream"
+require "src.util.bytestream"
 require "src.content.beatmap.beatmapset"
 
 -- test
@@ -24,35 +27,35 @@ local BlockOffsets = @enum{
     IdOffset = 0x80,
 }
 
-local function read_magic(map: filestream): string
-    map:seek("set", BlockOffsets.Magic)
-    return map:read(4)
+local function read_magic(map: bytestream): string
+    map:seek(BlockOffsets.Magic)
+    return tostring(map:read_exact(4))
 end
 
-local function verify_signature(map: filestream): boolean
+local function verify_signature(map: bytestream): boolean
     return read_magic(map) == "SS+m"
 end
 
-local function get_version(map: filestream): uint16
-    map:seek("set", BlockOffsets.Version)
+local function get_version(map: bytestream): uint16
+    map:seek(BlockOffsets.Version)
     return map:get_16()
 end
 
-local function get_title(map: filestream): string
-    map:seek("set", BlockOffsets.IdOffset)
+local function get_title(map: bytestream): string
+    map:seek(BlockOffsets.IdOffset)
     local title_offs = BlockOffsets.IdOffset + map:get_16() + 0x2
-    map:seek("set", title_offs)
+    map:seek(title_offs)
     return map:get_string()
 end
 
-local function get_mappers(map: filestream): vector(string)
+local function get_mappers(map: bytestream): vector(string)
     local mappers: vector(string)
 
-    map:seek("set", BlockOffsets.IdOffset)
+    map:seek(BlockOffsets.IdOffset)
     local title_offs = BlockOffsets.IdOffset + map:get_16() + 0x2
-    map:seek("set", title_offs)
+    map:seek(title_offs)
     local mapper_offs = title_offs + map:get_16() + 0x2
-    map:seek("set", mapper_offs)
+    map:seek(mapper_offs)
 
     map:get_string()
 
@@ -64,22 +67,25 @@ local function get_mappers(map: filestream): vector(string)
     return mappers
 end
 
-local function get_audio(map: filestream, offsets: DataOffsets): vector(byte)
-    local audio: vector(byte)
-    map:seek("set", offsets.audio)
+local function get_audio(map: bytestream, offsets: DataOffsets): span(byte)
+    map:seek(offsets.audio)
+    
+    local audio = default_allocator:new(@byte, offsets.audio_length)
+    print(#audio, offsets.audio, offsets.audio_length)
     for i = 0, <offsets.audio_length do
-        audio:push(map:get_8())
+        audio[i] = map:get_8()
     end
+
     return audio
 end
 
-local function get_notes(map: filestream): vector(NoteData)
+local function get_notes(map: bytestream): vector(NoteData)
     local notes: vector(NoteData)
 
-    map:seek("set", BlockOffsets.NoteCount)
+    map:seek(BlockOffsets.NoteCount)
     local note_count = map:get_32()
 
-    map:seek("set", BlockOffsets.MarkerOffset)
+    map:seek(BlockOffsets.MarkerOffset)
     notes:reserve(note_count)
 
     local convUnion = @union {
@@ -119,18 +125,20 @@ local function get_notes(map: filestream): vector(NoteData)
     return notes
 end
 
-local function get_data_offsets(map: filestream): DataOffsets
+local function get_data_offsets(map: bytestream): DataOffsets
     local offsets = DataOffsets{}
     
-    map:seek("set", BlockOffsets.DataOffsets)
+    map:seek(BlockOffsets.DataOffsets)
     
     offsets.custom_data = map:get_64()
-    map:seek("cur", 0x8)
 
+    map:seek(0x40)
     offsets.audio = map:get_64()
     offsets.audio_length = map:get_64()
 
-    map:seek("set", BlockOffsets.MarkerOffset)
+    print(offsets.audio_length)
+
+    map:seek(BlockOffsets.MarkerOffset)
     offsets.markers = map:get_64()
 
     return offsets
@@ -143,8 +151,7 @@ function BeatmapSet.from_sspm(path: string): BeatmapSet
 
     logger:info("Loading map '", path, "'")
 
-    local file, msg, code = io.open(path, "r")
-    defer file:close() end
+    local file, msg, code = bytestream.open(path)
 
     if code ~= 0 then
         logger:warn("Failed to open map file '", path, "'")
@@ -163,7 +170,7 @@ function BeatmapSet.from_sspm(path: string): BeatmapSet
     set.version = get_version(file)
     set.title = get_title(file)
     set.mappers = get_mappers(file)
-    set.audio = get_audio()
+    set.audio = get_audio(file, offsets)
 
     set.difficulties:push(Beatmap{
         version = 1,

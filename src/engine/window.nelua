@@ -6,6 +6,7 @@ global Window = @record{
 }
 
 function Window:init(width: usize, height: usize, title: string): void
+	rl.initAudioDevice()
 	rl.initWindow(width, height, title)
 end
 

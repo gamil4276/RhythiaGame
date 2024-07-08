@@ -1,0 +1,74 @@
+require "filestream"
+require "io"
+global bytestream = @record{
+    index: usize,
+    data: span(uint8)
+}
+
+function bytestream.open(path: string): (bytestream, string, integer)
+    local file, msg, code = filestream.open(path, "rb")
+
+    return bytestream {
+        index = 0,
+        data = file:read("a")
+    }, msg, code
+end
+
+function bytestream:seek(location: usize): void
+    self.index = location
+end
+
+function bytestream:read_exact(size: usize <comptime>): string
+    local data = string.create(size)
+    for i = 1, size do
+        data[i] = self.data[self.index]
+        self.index = self.index + 1
+    end
+    return data
+end
+
+function bytestream:get_8(): uint8
+    self.index = self.index + 1
+    return self.data[self.index - 1]
+end
+
+function bytestream:get_16(): uint16
+    self.index = self.index + 2
+    return ((@uint32)(self.data[self.index - 1]) << 8) | (@uint32)(self.data[self.index - 2])
+end
+
+function bytestream:get_32(): uint32
+    self.index = self.index + 4
+    return ((@uint32)(self.data[self.index - 1]) << 24) | ((@uint32)(self.data[self.index - 2]) << 16) | ((@uint32)(self.data[self.index - 3]) << 8) | (@uint32)(self.data[self.index - 4])
+end
+
+function bytestream:get_64(): uint64
+    self.index = self.index + 8
+    return ((@uint32)(self.data[self.index - 1]) << 56) | ((@uint32)(self.data[self.index - 2]) << 48) | ((@uint32)(self.data[self.index - 3]) << 40) | ((@uint32)(self.data[self.index - 4]) << 32) | ((@uint32)(self.data[self.index - 5]) << 24) | ((@uint32)(self.data[self.index - 6]) << 16) | ((@uint32)(self.data[self.index - 7]) << 8) | (@uint32)(self.data[self.index - 8])
+end
+
+function bytestream:get_string(): string
+    local len = self:get_16()
+    local value: stringbuilder
+    value:prepare(len)
+    defer value:destroy() end
+    
+    for i = 0, <len do
+        value:writebyte(self:get_8())
+    end
+
+    return value:__tostring()
+end
+
+function bytestream:get_string_long(): string
+    local len = self:get_32()
+    local value: stringbuilder
+    value:prepare(len)
+    defer value:destroy() end
+
+    for i = 0, <len do
+        value:writebyte(self:get_8())
+    end
+
+    return value:__tostring()
+end

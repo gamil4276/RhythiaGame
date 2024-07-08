@@ -1,9 +1,12 @@
 require "raylib"
+require "memory"
 
+require "src.engine.logger"
 require "src.engine.audio.util"
+require "allocators.default"
 
 global SyncedAudioPlayer = @record{
-    stream: rl.Music,
+    stream: rl.music,
     data: vector(byte),
 
     speed: float32,
@@ -12,10 +15,10 @@ global SyncedAudioPlayer = @record{
     last_time: float32,
 }
 
-function SyncedAudioPlayer.new(path: string, volume: float32, speed: float32): SyncedAudioPlayer
+function SyncedAudioPlayer.from_path(path: string, volume: float32, speed: float32): SyncedAudioPlayer
     local player: SyncedAudioPlayer
 
-    player.stream = rl.loadMusicScream(path)
+    player.stream = rl.loadMusicStream(path)
     rl.setMusicVolume(player.stream, volume)
     rl.setMusicPitch(player.stream, speed)
     player.speed = speed
@@ -23,15 +26,15 @@ function SyncedAudioPlayer.new(path: string, volume: float32, speed: float32): S
     return player
 end
 
-function SyncedAudioPlayer.new(data: vector(byte), volume: float32, speed: float32): SyncedAudioPlayer
+function SyncedAudioPlayer.from_bytes(data: span(byte), volume: float32, speed: float32): SyncedAudioPlayer
     local player: SyncedAudioPlayer
-    
-    player.data = data;
 
-    player.stream = rl.loadMusicStreamFromMemory(get_file_format(data.data), data)
+    logger:info("Loading audio: ", #data, " bytes")
+
+    player.stream = rl.loadMusicStreamFromMemory(get_audio_file_format(data), (@*[0]cuchar)(data.data), #data)
     rl.setMusicVolume(player.stream, volume)
     rl.setMusicPitch(player.stream, speed)
-    player.speed = speed
+    player.speed = speed    
 
     return player
 end
@@ -39,4 +42,8 @@ end
 function SyncedAudioPlayer:play(from: float32): void
     rl.playMusicStream(self.stream)
     rl.seekMusicStream(self.stream, from)
+end
+
+function SyncedAudioPlayer:update(): void
+    -- rl.updateMusicStream(self.stream)
 end
