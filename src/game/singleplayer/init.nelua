@@ -1,0 +1,16 @@
+global SingleplayerScene = @record{
+}
+
+function SingleplayerScene:init_impl(): void
+    print("should be called once")
+end
+
+function SingleplayerScene:update_impl(handler: *SceneHandler, dt: float32): void
+
+end
+
+function SingleplayerScene:render_impl(handler: *SceneHandler): void
+
+end
+
+## register_scene(SingleplayerScene)

@@ -2,13 +2,18 @@ require "src.engine.scene.register"
 require "src.engine.scene.handler"
 require "src.content.beatmap.parsers.ssp"
 require "src.game.global"
+require "src.game.singleplayer"
 
 global LoadingScene = @record{
 }
 
+function LoadingScene:init_impl(): void
+	DemoMap = BeatmapSet.from_sspm("demomap/fly.sspm")	
+end
+
 function LoadingScene:update_impl(handler: *SceneHandler, dt: float32): void
-	DemoMap = BeatmapSet.from_sspm("demomap/fly.sspm")
 	handler:remove_scene("Loading")
+	handler:add_scene("Singleplayer", &SingleplayerScene{}, SingleplayerScene.init, SingleplayerScene.update, SingleplayerScene.render)
 end
 
 function LoadingScene:render_impl(handler: *SceneHandler): void

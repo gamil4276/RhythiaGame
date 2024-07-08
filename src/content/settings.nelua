@@ -1,0 +1,9 @@
+global NoteSettings = @record{
+    approach_distance: float32,
+    approach_time: float32,
+    pushback: boolean,
+}
+
+global Settings = @record{
+    note: NoteSettings,
+}

@@ -1,0 +1,42 @@
+require "raylib"
+
+require "src.engine.audio.util"
+
+global SyncedAudioPlayer = @record{
+    stream: rl.Music,
+    data: vector(byte),
+
+    speed: float32,
+    time: float32,
+    
+    last_time: float32,
+}
+
+function SyncedAudioPlayer.new(path: string, volume: float32, speed: float32): SyncedAudioPlayer
+    local player: SyncedAudioPlayer
+
+    player.stream = rl.loadMusicScream(path)
+    rl.setMusicVolume(player.stream, volume)
+    rl.setMusicPitch(player.stream, speed)
+    player.speed = speed
+
+    return player
+end
+
+function SyncedAudioPlayer.new(data: vector(byte), volume: float32, speed: float32): SyncedAudioPlayer
+    local player: SyncedAudioPlayer
+    
+    player.data = data;
+
+    player.stream = rl.loadMusicStreamFromMemory(get_file_format(data.data), data)
+    rl.setMusicVolume(player.stream, volume)
+    rl.setMusicPitch(player.stream, speed)
+    player.speed = speed
+
+    return player
+end
+
+function SyncedAudioPlayer:play(from: float32): void
+    rl.playMusicStream(self.stream)
+    rl.seekMusicStream(self.stream, from)
+end

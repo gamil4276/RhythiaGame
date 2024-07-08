@@ -8,4 +8,8 @@ require "src.engine.scene.handler"
 	function #[SceneT]#.render(scene: pointer, handler: pointer): void
 		#[SceneT]#.render_impl((@*#[SceneT]#)(scene), (@*SceneHandler)(handler))
 	end
+
+	function #[SceneT]#.init(scene: pointer): void
+		#[SceneT]#.init_impl((@*#[SceneT]#)(scene))
+	end
 ## end

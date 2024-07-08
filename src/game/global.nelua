@@ -1,3 +1,12 @@
 require "src.content.beatmap.beatmapset"
+require "src.content.settings"
 
 global DemoMap: BeatmapSet
+
+global Settings = Settings {
+    note = NoteSettings {
+        approach_time = 0.36,
+        approach_distance = 14.0,
+        pushback = true,
+    }
+}

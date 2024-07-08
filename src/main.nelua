@@ -24,7 +24,6 @@ end
 logger:init("rhythia.log")
 
 local window: Window
-local test: LoadingScene
 window:init(1280, 720, "Rhythia")
-window.scene_handler:add_scene("Loading", &test, LoadingScene.update, LoadingScene.render)
+window.scene_handler:add_scene("Loading", &LoadingScene{}, LoadingScene.init, LoadingScene.update, LoadingScene.render)
 window:run()
