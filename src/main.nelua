@@ -1,3 +1,10 @@
+##[[
+cdefine "NOGDI"
+cdefine "NOUSER"
+]]
+
+require "raylib"
+
 require "src.content.beatmap.parsers.ssp"
 require "src.engine.logger"
 require "src.engine.window"
