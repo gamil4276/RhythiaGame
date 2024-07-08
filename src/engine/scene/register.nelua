@@ -1,0 +1,11 @@
+require "src.engine.scene.handler"
+
+## function register_scene(SceneT)
+	function #[SceneT]#.update(scene: pointer, handler: pointer, dt: float32): void
+		#[SceneT]#.update_impl((@*#[SceneT]#)(scene), (@*SceneHandler)(handler), dt)
+	end
+
+	function #[SceneT]#.render(scene: pointer, handler: pointer): void
+		#[SceneT]#.render_impl((@*#[SceneT]#)(scene), (@*SceneHandler)(handler))
+	end
+## end

@@ -1,0 +1,49 @@
+require "src.engine.logger"
+require "raylib"
+
+global SceneCallback = @record{
+	name: string,
+	scene: pointer,
+	update: function(scene: pointer, handler: pointer, dt: float32): void,
+	render: function(scene: pointer, handler: pointer): void,
+}
+
+global SceneHandler = @record{
+	scene_list: vector(SceneCallback),
+	remove_queue: vector(SceneCallback)
+}
+
+function SceneHandler:add_scene(name: string, scene: pointer, update_callback: function(scene: pointer, handler: pointer, dt: float32): void, render_callback: function(scene: pointer, handler: pointer): void): void
+	self.scene_list:push(SceneCallback{
+		name = name,
+		scene = scene,
+		update = update_callback,
+		render = render_callback,
+	})
+end
+
+function SceneHandler:update_all(): void
+	for _, scene in ipairs(self.scene_list) do
+		scene.update(scene.scene, self, rl.getFrameTime())
+	end
+
+	for _, scene in ipairs(self.remove_queue) do
+		self.scene_list:removevalue(scene)
+	end
+
+	self.remove_queue:clear()
+end
+
+function SceneHandler:render_all(): void
+	for _, scene in ipairs(self.scene_list) do
+		scene.render(scene.scene, self)
+	end
+end
+
+function SceneHandler:remove_scene(name: string): void
+	for _, scene in ipairs(self.scene_list) do
+		if scene.name == name then
+			self.remove_queue:push(scene)
+		end
+	end
+end

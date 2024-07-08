@@ -1,4 +1,11 @@
 require "src.content.beatmap.parsers.ssp"
 require "src.engine.logger"
-
+require "src.engine.window"
+require "src.game.loading"
 logger:init("rhythia.log")
+
+local window: Window
+local test: LoadingScene
+window:init(1280, 720, "Rhythia")
+window.scene_handler:add_scene("Loading", &test, LoadingScene.update, LoadingScene.render)
+window:run()
