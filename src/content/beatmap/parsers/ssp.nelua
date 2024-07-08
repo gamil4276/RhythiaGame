@@ -64,6 +64,15 @@ local function get_mappers(map: filestream): vector(string)
     return mappers
 end
 
+local function get_audio(map: filestream, offsets: DataOffsets): vector(byte)
+    local audio: vector(byte)
+    map:seek("set", offsets.audio)
+    for i = 0, <offsets.audio_length do
+        audio:push(map:get_8())
+    end
+    return audio
+end
+
 local function get_notes(map: filestream): vector(NoteData)
     local notes: vector(NoteData)
 
@@ -154,6 +163,7 @@ function BeatmapSet.from_sspm(path: string): BeatmapSet
     set.version = get_version(file)
     set.title = get_title(file)
     set.mappers = get_mappers(file)
+    set.audio = get_audio()
 
     set.difficulties:push(Beatmap{
         version = 1,

@@ -7,5 +7,7 @@ global BeatmapSet = @record{
     title: string,
     mappers: vector(string),
     difficulties: vector(Beatmap),
+
+    audio: vector(byte),
 }
 
