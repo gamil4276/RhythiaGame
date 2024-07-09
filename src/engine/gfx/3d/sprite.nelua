@@ -1,0 +1,19 @@
+require "raylib"
+
+global Sprite = @record{
+    position: rl.vector3,
+    rotation: rl.vector3,
+    size: rl.vector2,
+    mesh: rl.mesh,
+    material: rl.material,
+}
+
+function Sprite.make_plane(position: rl.vector3, rotation: rl.vector3, size: rl.vector2, texture_path: string): Sprite
+    local sprite = Sprite {
+        position = position,
+        rotattion = rotation,
+        size = size,
+    }
+
+    local img = rl.loadImage(texture)
+end

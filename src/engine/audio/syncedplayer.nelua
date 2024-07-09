@@ -1,5 +1,5 @@
 require "raylib"
-require "memory"
+require "math"
 
 require "src.engine.logger"
 require "src.engine.audio.util"
@@ -7,12 +7,10 @@ require "allocators.default"
 
 global SyncedAudioPlayer = @record{
     stream: rl.music,
-    data: vector(byte),
+    data: span(byte),
 
     speed: float32,
     time: float32,
-    
-    last_time: float32,
 }
 
 function SyncedAudioPlayer.from_path(path: string, volume: float32, speed: float32): SyncedAudioPlayer
@@ -31,7 +29,10 @@ function SyncedAudioPlayer.from_bytes(data: span(byte), volume: float32, speed: 
 
     logger:info("Loading audio: ", #data, " bytes")
 
-    player.stream = rl.loadMusicStreamFromMemory(get_audio_file_format(data), (@*[0]cuchar)(data.data), #data)
+    player.data = data;
+
+    player.stream = rl.loadMusicStreamFromMemory(get_audio_file_format(data), (@*[0]cuchar)(player.data.data), #data)
+
     rl.setMusicVolume(player.stream, volume)
     rl.setMusicPitch(player.stream, speed)
     player.speed = speed    
@@ -44,6 +45,21 @@ function SyncedAudioPlayer:play(from: float32): void
     rl.seekMusicStream(self.stream, from)
 end
 
+function SyncedAudioPlayer:should_sync(): boolean
+    return math.abs(self.time - rl.getMusicTimePlayed(self.stream)) >= 0.2
+end
+
+function SyncedAudioPlayer:sync(): void
+    if self:should_sync() then
+        logger:info("Resynced audio to ", self.time)
+        rl.seekMusicStream(self.stream, self.time)
+    end
+end
+
 function SyncedAudioPlayer:update(): void
-    -- rl.updateMusicStream(self.stream)
+    if rl.IsMusicStreamPlaying(self.stream) ~= true then return end
+
+    rl.updateMusicStream(self.stream)
+    self.time = self.time + rl.getFrameTime()
+    self:sync()
 end

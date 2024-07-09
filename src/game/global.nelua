@@ -3,6 +3,11 @@ require "src.content.settings"
 
 global DemoMap: BeatmapSet
 
+global State = @enum{
+	Loading = 1,
+	Singleplayer,
+}
+
 global Settings = Settings {
     note = NoteSettings {
         approach_time = 0.36,

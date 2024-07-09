@@ -1,0 +1,45 @@
+require "raylib"
+require "src.game.global"
+
+require "src.game.loading"
+require "src.game.singleplayer"
+
+global Window = @record{
+	state: State,
+	loadingScene: LoadingScene,
+	singleplayerScene: SingleplayerScene, 
+}
+
+function Window:init(width: usize, height: usize, title: string): void
+	rl.initAudioDevice()
+	rl.initWindow(width, height, title)
+end
+
+function Window:run(): void
+	while rl.windowShouldClose() ~= true do
+		rl.beginDrawing()
+		rl.clearBackground(rl.BLACK)
+
+		switch self.state do
+		case State.Loading then
+			if self.loadingScene.initialized ~= true then
+				self.loadingScene:init()
+				self.loadingScene.initialized = true
+			else
+				self.state = self.loadingScene:update()
+				self.loadingScene:render()
+			end
+		case State.Singleplayer then
+			if self.singleplayerScene.initialized ~= true then
+				self.singleplayerScene:init()
+				self.singleplayerScene.initialized = true
+			else
+				self.state = self.singleplayerScene:update()
+				self.singleplayerScene:render()
+			end
+		end
+		
+		rl.drawFPS(0, 0)
+		rl.endDrawing()
+	end
+end

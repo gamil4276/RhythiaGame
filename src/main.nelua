@@ -10,7 +10,7 @@ require "raylib"
 
 require "src.content.beatmap.parsers.ssp"
 require "src.engine.logger"
-require "src.engine.window"
+require "src.game.window"
 require "src.game.loading"
 
 ##[[
@@ -28,5 +28,5 @@ logger:init("rhythia.log")
 
 local window: Window
 window:init(1280, 720, "Rhythia")
-window.scene_handler:add_scene("Loading", &LoadingScene{}, LoadingScene.init, LoadingScene.update, LoadingScene.render)
+window.state = State.Loading
 window:run()
