@@ -1,0 +1,40 @@
+require "src.game.singleplayer.note"
+require "src.game.global"
+require "src.engine.logger"
+require "allocators.default"
+
+global NoteSpawner = @record{
+    ordered_notes: span(Note),
+
+    start_process: usize,
+
+    to_update_indices: vector(usize),
+}
+
+function NoteSpawner:load_notes(): void
+    logger:info("Started loading notes...")
+    self.ordered_notes = default_allocator:new(@Note, #DemoMap.difficulties[0].notes)
+
+    for i = 0, <#DemoMap.difficulties[0].notes do
+        local note = DemoMap.difficulties[0].notes[i]
+        self.ordered_notes[i] = Note{
+            x = note.x,
+            y = note.y,
+            t = note.t,
+
+            hit = false,
+            index = i,
+
+            color = rl.WHITE,
+        }
+    end
+
+    logger:info("Loaded ", #self.ordered_notes, " notes")
+end
+
+function NoteSpawner:init(): void
+    self.start_process = 0
+    self.to_update_indices:clear()
+
+    self:load_notes()
+end

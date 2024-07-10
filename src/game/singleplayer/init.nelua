@@ -1,13 +1,16 @@
 require "src.engine.audio.syncedplayer"
 require "src.game.global"
+require "src.game.singleplayer.note.spawner"
 
 global SingleplayerScene = @record{
     audio: SyncedAudioPlayer,
+    note_spawner: NoteSpawner,
     initialized: boolean,
 }
 
 function SingleplayerScene:init(): void
     self.audio = SyncedAudioPlayer.from_bytes(DemoMap.audio, 0.1, 1.0)
+    self.note_spawner:init()
     self.audio:play(0.0)
 end
 
@@ -17,4 +20,5 @@ function SingleplayerScene:update(dt: float32): State
 end
 
 function SingleplayerScene:render(): void
+
 end

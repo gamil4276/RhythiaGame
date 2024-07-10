@@ -1,4 +1,5 @@
 ##[[
+cflags "-Iraylib"
 cdefine "NOGDI"
 cdefine "NOUSER"
 cdefine "SUPPORT_FILEFORMAT_MP3"

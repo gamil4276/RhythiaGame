@@ -1,0 +1,36 @@
+require "raylib"
+
+global AABB: float32 = (1.75 + 0.525) / 2.0;
+global HITWINDOW: float32 = 0.055
+
+global Note = @record {
+	x: float32,
+	y: float32,
+	t: float32,
+
+	hit: boolean,
+	index: usize,
+
+	color: rl.color,
+}
+
+function Note:calculate_time(time: float32, approach_time: float32): float32
+	return (self.t - time) / approach_time
+end
+
+
+function Note:in_hitwindow(time: float32, speed: float32): boolean
+	return (time - self.t) <= HITWINDOW * speed
+end
+
+function Note:is_visible(time: float32, speed: float32, approach_time: float32, pushback: boolean): boolean
+	if self.hit then return false
+	elseif time > self.t and not pushback then return false
+	end
+
+	return self:calculate_time(time, approach_time) <= 1.0 and self:in_hitwindow(time, speed)
+end
+
+function Note:is_hitting(position: rl.vector2): boolean
+	return math.abs(-position.x - self.x) <= AABB and math.abs(-position.y - self.y) <= AABB
+end
